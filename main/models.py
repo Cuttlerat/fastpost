@@ -1,4 +1,3 @@
-import re
 from django.db import models
 from django.utils import timezone
 from django.utils.html import strip_tags
@@ -34,7 +33,7 @@ class Post(models.Model):
     content = HTMLField()
     pictures = models.ManyToManyField(Picture, blank=True)
     created_at = models.DateTimeField(default=timezone.now)
-    author = models.ForeignKey(User)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
 class Comment(models.Model):
@@ -42,5 +41,18 @@ class Comment(models.Model):
     def __str__(self):
         return self.text[0:20]
 
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
     text = models.TextField()
-    author = models.OneToOneField(to=User)
+    author = models.ForeignKey(User,
+                               on_delete=models.CASCADE,
+                               blank=True,
+                               null=True)
+
+
+class Tag(models.Model):
+
+    def __str__(self):
+        return self.name
+
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)

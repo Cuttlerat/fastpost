@@ -18,8 +18,15 @@ from django.conf.urls import include, url
 from django.contrib import admin
 import main.views
 
+try:
+    from .local_settings import ADMIN_URL
+    if not ADMIN_URL:
+        raise ImportError
+except ImportError:
+    ADMIN_URL = 'admin'
+
 urlpatterns = [
-    url(r'^admin/', admin.site.urls),
+    url(r'^{}/'.format(ADMIN_URL), admin.site.urls),
 
     url(r'^$', main.views.index),
     url(r'^register$', main.views.RegistrationFormView.as_view(), name='register'),
@@ -31,7 +38,11 @@ urlpatterns = [
 
     url(r'^post/(?P<post_title>[a-zA-Z0-9\-_]+)', main.views.PostView.as_view(), name='viewpost'),
 
+    url(r'^tag/(?P<tag_id>\w+)$', main.views.TagView.as_view(), name='tagsearch'),
+
     url(r'^tinymce/', include('tinymce.urls')),
+
+    url(r'^captcha/', include('captcha.urls')),
 ]
 
 if settings.DEBUG:

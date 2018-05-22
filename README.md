@@ -1,5 +1,7 @@
 # fastpost
-Blog engine in Django Framework, just for fun
+Blog engine in Django Framework, just for fun. You can see the demo site on http://fastpost.hotkosc.ru
+
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/fe9b5907856f438f9e9e4de0e114e342)](https://www.codacy.com/app/hotkosc/fastpost?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=kosc/fastpost&amp;utm_campaign=Badge_Grade)
 
 # Installation instructions:
 Install python3.5 or later and pip.
@@ -10,7 +12,7 @@ cd fastpost
 pip install --user -r requirements/dev.txt # if you want to help me with this project or just test this.
 pip install --user -r requirements/base.txt # if you want to use this on production
 ```
-Create user and database for fastpost in postgresql, and create fastpost/local\_settings.py with following content:
+Create fastpost/local\_settings.py with following content:
 ```python
 # from .settings import INSTALLED_APPS, MIDDLEWARE_CLASSES
 # Uncomment first line for development server
@@ -20,11 +22,14 @@ DEBUG = True # False if your want to use fastpost in production
 ALLOWED_HOSTS = [] # for development
 ALLOWED_HOSTS = ['*'] # for docker-compose
 ALLOWED_HOSTS = ["your-production-domain"] # for production
+ADMIN_URL = 'admin' # Path of administrator panel
+
+STATIC_ROOT = "static/" # For nginx in docker
 
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'fastpostdb.sqlite3', # database for fastpost
+        'NAME': 'data/fastpostdb.sqlite3', # database for fastpost
     }
 }
 
@@ -40,7 +45,6 @@ python manage.py runserver
 ```
 To run with a docker compose
 ```
-touch fastpostdb.sqlite3
 docker-compose up
 ```
 

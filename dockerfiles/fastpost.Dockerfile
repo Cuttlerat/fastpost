@@ -1,5 +1,6 @@
 FROM python:3.6
-ADD . /fastpost
+MAINTAINER Kosenko Artyom <kosc@hotkosc.ru>
+ENV PYTHONBUFFERED 1
+COPY . /fastpost
 WORKDIR /fastpost
-RUN pip3.6 install -r requirements/base.txt
-RUN python3.6 /fastpost/manage.py migrate
+RUN pip install -r requirements/dev.txt

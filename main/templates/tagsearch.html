@@ -1,0 +1,7 @@
+{% extends 'main.html' %}
+{% load i18n %}
+
+{% block content %}
+  <h1>{% trans "Posts with tag " %}"{{ tag_name }}"</h1>
+  {% include 'postslist.html' %}
+{% endblock %}

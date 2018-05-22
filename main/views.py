@@ -3,10 +3,12 @@ from django.utils.text import slugify
 from django.shortcuts import render, redirect
 from django.views.generic.edit import FormView
 from django.views.generic.base import View
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.models import User
 from django.contrib.auth import login, logout
-from main.models import Post
-from main.forms import NewPostForm, PartialNewPostForm
+from main.models import Post, Comment, Tag
+from main.forms import NewPostForm, PartialNewPostForm, NewCommentForm, \
+                       RegistrationForm
 
 
 def index(request):
@@ -15,7 +17,7 @@ def index(request):
 
 
 class RegistrationFormView(FormView):
-    form_class = UserCreationForm
+    form_class = RegistrationForm
     success_url = "/"
     template_name = "register.html"
 
@@ -54,6 +56,13 @@ class NewPostView(FormView):
         post.slug = unidecode(post.title)
         post.slug = slugify(post.slug)
         post.save()
+        if 'tags_field' in self.request.POST.keys():
+            tags = self.request.POST['tags_field'].replace(', ', ',').split(',')
+            for tag_name in tags:
+                tag = Tag()
+                tag.post = post
+                tag.name = tag_name
+                tag.save()
         self.success_url = "/post/" + post.slug
         return super(NewPostView, self).form_valid(form)
 
@@ -85,11 +94,46 @@ class PostView(View):
 
     def get(self, request, post_title):
         post = Post.objects.filter(slug=post_title)[0]
+        tags = Tag.objects.filter(post_id=post.id)
+        comments = Comment.objects.filter(post_id=post.id)
+        form = NewCommentForm()
         editable = False
         if post.author == request.user:
             editable = True
         context = {
             "post": post,
-            "editable": editable
+            "editable": editable,
+            "comments": comments,
+            "form": form,
+            "tags": tags,
         }
         return render(request, "postview.html", context)
+
+    def post(self, request, post_title):
+        post = Post.objects.filter(slug=post_title)[0]
+        comment = Comment()
+        comment.post = post
+        comment.text = request.POST['text']
+        if isinstance(request.user, User):
+            comment.author = request.user
+            comment.save()
+        else:
+            form = NewCommentForm(request.POST)
+            if form.is_valid():
+                comment.save()
+        return redirect('/post/' + post.slug)
+
+
+class TagView(View):
+
+    def get(self, request, tag_id):
+        tag = Tag.objects.get(pk=tag_id)
+        tags = Tag.objects.filter(name=tag.name)
+        posts = []
+        for tag in tags:
+            posts.append(tag.post)
+        context = {
+            "posts": posts,
+            "tag_name": tag.name,
+        }
+        return render(request, "tagsearch.html", context)

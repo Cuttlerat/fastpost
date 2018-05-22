@@ -2,11 +2,38 @@
 {% load i18n %}
 
 {% block content %}
-<h1>{{ post.title }}</h1>
-{% if editable %}
-<a href="/editpost/{{post.id}}">{% trans 'Edit post' %}</a>
-{% endif %}
-{{ post.content|safe }}
-<hr>
-{{ post.created_at }}
+  <h1>{{ post.title }}</h1>
+  {% if editable %}
+    <a href="/editpost/{{post.id}}">{% trans 'Edit post' %}</a>
+  {% endif %}
+  {{ post.content|safe }}
+  <hr>
+  {% for tag in tags %}
+    <a href="{% url 'tagsearch' tag.id %}">
+      <span class="badge">#{{ tag.name }}</span>
+    </a>
+  {% endfor %}
+  {{ post.created_at }}
+  <hr>
+  <ul>
+    {% for comment in comments %}
+      <li>
+        {% if comment.author %}
+          {{ comment.author.username }}
+        {% else %}
+          {% trans 'Anonymous' %}
+        {% endif %}
+        {% trans 'sayd:' %}<br>
+        {{ comment.text|safe }}
+      </li>
+    {% endfor %}
+  </ul>
+  <form action="/post/{{ post.slug }}" method="POST" novalidate>
+    {% csrf_token %}
+    {{ form.text }}
+    {% if not user.is_authenticated %}
+    {{ form.captcha }}
+    {% endif %}
+    <input type="submit" value="{% trans 'Add comment' %}">
+  </form>
 {% endblock %}

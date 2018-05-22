@@ -2,4 +2,5 @@ fastpost/local_settings.py
 *.pyo
 *.pyc
 **/__pycache__/
-fastpostdb.sqlite3
+data/*
+static
